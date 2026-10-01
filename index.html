@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a0f1a" />
+<title>PT3 Command Center</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="stylesheet" href="style.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">PT3 <span>COMMAND CENTER</span></div>
+    <div class="top-stats">
+      <div class="stat"><span class="label">TARGET SCORE</span><span class="value cyan">90%</span></div>
+      <div class="stat"><span class="label">EXAMS START</span><span class="value">15 OCTOBER</span></div>
+      <div class="stat"><span class="label">DAYS LEFT</span><span class="value pink" id="daysLeft">--</span></div>
+      <div class="user-box" id="userBox" style="display:none">
+        <img id="userAvatar" src="" alt="" />
+        <span id="userName"></span>
+        <button id="logoutBtn">Sign out</button>
+      </div>
+      <button id="loginBtn" class="login-btn">Sign in with Google</button>
+    </div>
+  </header>
+
+<!-- NOTIFICATION BANNER -->
+<div id="notifBanner" class="notif-banner" style="display:none">
+  <span>🔔 Enable reminders so PT3 can nudge you on time</span>
+  <div class="notif-actions">
+    <button id="enableNotif">Enable</button>
+    <button id="dismissNotif" class="ghost">Later</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- REMINDERS PANEL -->
+  <section>
+    <h2>Reminder Schedule</h2>
+    <p class="sub">Daily nudges · Tap to toggle · Sync to your phone</p>
+    <div class="reminder-actions">
+      <button id="notifStatusBtn" class="btn">🔔 Check notification status</button>
+      <button id="testNotif" class="btn ghost">Send test</button>
+      <button id="exportCal" class="btn cyan">📅 Export to Calendar</button>
+    </div>
+    <div class="reminder-list" id="reminderList"></div>
+  </section>
+
+  <!-- PRIORITY MATRIX -->
+  <section>
+    <h2>Subject Priority Matrix</h2>
+    <div class="priority-grid">
+      <div class="prio-card p1"><div class="num">1</div><div><h3>MATHS</h3><p>HIGH PRIORITY</p></div><span class="dot"></span></div>
+      <div class="prio-card p1"><div class="num">2</div><div><h3>SCIENCE</h3><p>HIGH PRIORITY</p></div><span class="dot"></span></div>
+      <div class="prio-card p1"><div class="num">3</div><div><h3>SST</h3><p>HIGH PRIORITY</p></div><span class="dot"></span></div>
+      <div class="prio-card p2"><div class="num">4</div><div><h3>ENGLISH</h3><p>MEDIUM</p></div><span class="dot"></span></div>
+      <div class="prio-card p3"><div class="num">5</div><div><h3>HINDI</h3><p>MAINTENANCE</p></div><span class="dot"></span></div>
+      <div class="prio-card p3"><div class="num">6</div><div><h3>IT</h3><p>MAINTENANCE</p></div><span class="dot"></span></div>
+    </div>
+    <div class="rule-bar">IF YOU CAN'T ANSWER WITHOUT LOOKING, YOU HAVEN'T FINISHED THE TOPIC.</div>
+  </section>
+
+  <section>
+    <h2>Study System Overview</h2>
+    <div class="overview-grid">
+      <div class="ov-card"><span class="ov-num">01</span><h4>DEEP STUDY</h4><p>Morning 6:05 – 6:50 · Hardest topic first</p></div>
+      <div class="ov-card"><span class="ov-num">02</span><h4>90% LOOP</h4><p>Learn → Recall → Solve → Redo → Test</p></div>
+      <div class="ov-card"><span class="ov-num">03</span><h4>MISTAKE BOOK</h4><p>Log every error · Redo within 48h</p></div>
+      <div class="ov-card"><span class="ov-num">04</span><h4>15-DAY PLAN</h4><p>Structured countdown · No new chapters late</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Daily Routine</h2>
+    <ul class="timeline" id="timeline"></ul>
+  </section>
+
+  <section>
+    <h2>The 90% Study Loop</h2>
+    <p class="sub">Active recall protocol — never skip a step</p>
+    <div class="loop-grid" id="loopGrid"></div>
+  </section>
+
+  <section>
+    <h2>Mistake Book Protocol</h2>
+    <ol class="mistake-list">
+      <li>Write question + your wrong answer</li>
+      <li>Write correct method / formula</li>
+      <li>Tag subject + chapter</li>
+      <li>Redo within 48 hours</li>
+      <li>Re-test after 3 days</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>15-Day Countdown</h2>
+    <p class="sub">1 – 15 October · Exact plan from Command Center</p>
+    <div class="table-wrap">
+      <table id="countdownTable">
+        <thead><tr><th>DAY</th><th>MATHS</th><th>SCIENCE</th><th>SST</th><th>OTHER</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Subject Checklists</h2>
+    <div class="checklists" id="checklists"></div>
+  </section>
+
+  <section>
+    <h2>Official Exam Timetable</h2>
+    <div class="exam-row" id="examRow"></div>
+  </section>
+
+  <section>
+    <h2>15-Day Progress Tracker</h2>
+    <p class="sub">Tap a cell when the daily subject target is closed via the 90% Loop.</p>
+    <div class="progress-wrap">
+      <table id="progressTable">
+        <thead><tr><th></th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>13</th><th>14</th><th>15</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Top 5 Weak Areas</h2>
+    <table class="weak-table">
+      <thead><tr><th>#</th><th>TOPIC / CHAPTER</th><th>FIX ACTION</th><th>REDO DATE</th></tr></thead>
+      <tbody id="weakBody"></tbody>
+    </table>
+    <p class="rule-line">Every red-priority mistake must be redone within 48 hours and re-tested after 3 days.</p>
+  </section>
+
+  <section class="two-col">
+    <div class="final-card">
+      <h3>14 OCT · D2 · FINAL LIGHT REVISION</h3>
+      <ul>
+        <li><b>Maths:</b> Formulas + theorems sheet only — no new problems</li>
+        <li><b>Science:</b> Diagrams, equations, important processes — light recall</li>
+        <li><b>SST:</b> Dates + maps + keywords — flash-card style</li>
+        <li><b>Hindi / English / IT:</b> Final light recall only</li>
+        <li>NO heavy studying at night · Sleep on time</li>
+        <li>Pack stationery, admit card, water bottle tonight</li>
+      </ul>
+    </div>
+    <div class="final-card">
+      <h3>15 OCT · D1 · EXAM DAY ROUTINE</h3>
+      <ul>
+        <li>05:30 — Wake + Fajr Salah</li>
+        <li>06:00 — Light breakfast, nothing heavy</li>
+        <li>06:30 — 30–40 min quick revision (formulas / diagrams only)</li>
+        <li>07:15 — No new chapters. Close books.</li>
+        <li>07:30 — Get ready calmly: uniform, bag, admit card, stationery</li>
+        <li>08:00+ — Leave with buffer time. Arrive early.</li>
+        <li>Exam — Read paper fully, attempt high-confidence questions first.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pre-Exam Checklist</h2>
+    <div class="pre-check" id="preCheck"></div>
+  </section>
+
+  <section class="final-command">
+    <h2>FINAL COMMAND</h2>
+    <p>You trained the loop. Trust the process. Execute with calm precision.</p>
+    <p class="highlight">Target 90% · One paper at a time · No panic · No new material</p>
+  </section>
+
+</main>
+
+<footer>PT3 COMMAND CENTER · TARGET 90% · EXAMS START 15 OCT</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
